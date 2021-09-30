@@ -1,18 +1,25 @@
-import requests, bs4
+import requests, bs4, sys
 import xml.etree.ElementTree as ET
 
+try:
+    out_put_file_path = sys.argv[1]
+except IndexError:
+    out_put_file_path = ''
 
 class App(object):
     def __init__(self, title, desc, image, stars, os, downloads):
-        self.title = title
-        self.desc = desc
-        self.image = image
-        self.stars = stars
-        self.os = os
-        self.downloads = downloads
+        self.title = title or ''
+        self.desc = desc or ''
+        self.image = image or ''
+        self.stars = stars or 0
+        self.os = os or ''
+        self.downloads = downloads or 0
     
     def __str__(self):
-        return f"{self.image}"
+        return f"{self.title}"
+    
+    def __dict__(self):
+        return dict(title = self.title, desc = 'self.desc', image = 'self.image', stars = self.stars, os = self.os, downloads = self.downloads)
         
 
 def scrap():
@@ -41,6 +48,7 @@ def scrap():
 
 
 def to_xml():
+    import xml.etree.ElementTree as ET
     apps = ET.Element("apps")
     for app in scrap():
         item = ET.SubElement(apps, "app")
@@ -51,12 +59,41 @@ def to_xml():
         item.set("os", app.os)
         item.set("downloads", str(app.downloads))
     str_data = ET.tostring(apps)
-    with open("apps.xml", "wb") as file:
+    with open(out_put_file_path, "wb") as file:
         file.write(str_data)
 
+def to_csv():
+    import csv
+    with open(out_put_file_path, "w") as file:
+        csv_writer = csv.DictWriter(file, ['title', 'desc', 'image', 'stars', 'os', 'downloads'])
+        csv_writer.writeheader()
+        for app in scrap():
+            try:
+                csv_writer.writerow(dict(app))
+            except: # encoding error
+                exit()
+                pass
+def to_json():
+    import json
+    with open(out_put_file_path, "w") as file:
+        json.dump(
+            file,
+            {
+                'apps': [app.__dict__() for app in scrap()]
+            }
+        )
+    
 
 if __name__ == '__main__':
-    to_xml()
-    print("done")
+    if out_put_file_path.endswith('csv'):
+        to_csv()
+    elif out_put_file_path.endswith("json"):
+        to_json()
+    elif out_put_file_path.endswith("xml"):
+        to_xml()
+    else:
+        for app in scrap():
+            print(app)
+    print(f"Done please check:\t{out_put_file_path}")
     
         
