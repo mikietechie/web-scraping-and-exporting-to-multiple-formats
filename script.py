@@ -8,12 +8,12 @@ except IndexError:
 
 class App(object):
     def __init__(self, title, desc, image, stars, os, downloads):
-        self.title = title or ''
-        self.desc = desc or ''
-        self.image = image or ''
-        self.stars = stars or 0
-        self.os = os or ''
-        self.downloads = downloads or 0
+        self.title = title
+        self.desc = desc
+        self.image = image
+        self.stars = stars
+        self.os = os
+        self.downloads = downloads
     
     def __str__(self):
         return f"{self.title}"
